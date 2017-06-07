@@ -848,4 +848,69 @@ class MinimumCostNetworkFlow {
 }
 endsnippet
 
+
+snippet mulmat "Matrix multification" b
+private static void mulMat(long[][] A, long[][] B, long[][] C) {
+	int M = A.length;
+	int N = B.length;
+	int L = B[0].length;
+	for (int i = 0; i < M; i++) {
+		for (int j = 0; j < L; j++) {
+			C[i][j] = 0;
+			for (int k = 0; k < N; k++) {
+				C[i][j] = (C[i][j] + A[i][k] * B[k][j]) % MOD;
+			}
+		}
+	}
+}
+endsnippet
+
+snippet powmat "Matrix fast power" b
+private static void mulMat(long[][] A, long[][] B, long[][] C) {
+	int M = A.length;
+	int N = B.length;
+	int L = B[0].length;
+	for (int i = 0; i < M; i++) {
+		for (int j = 0; j < L; j++) {
+			C[i][j] = 0;
+			for (int k = 0; k < N; k++) {
+				C[i][j] = (C[i][j] + A[i][k] * B[k][j]) % MOD;
+			}
+		}
+	}
+}
+
+private static long[][] powMat(long[][] A, long n) {
+	// A, B, C must be square matrix.
+	long[][] B = new long[A.length][A.length];
+	long[][] C = new long[A.length][B.length];
+	long[][] tmp;
+	// C will be initialized as identity matrix
+	for (int i = 0; i < C.length; i++) {
+		C[i][i] = 1;
+	}
+
+	while (n > 0) {
+		if ((n & 1) == 1) {
+			mulMat(C, A, B);
+
+			// Exchange C and B
+			tmp = C;
+			C = B;
+			B = tmp;
+		}
+
+		n >>= 1;
+		mulMat(A, A, B);
+
+		// Exchange A and B
+		tmp = A;
+		A = B;
+		B = tmp;
+	}
+
+	return C;
+}
+endsnippet
+
 # vim:ft=snippets:
