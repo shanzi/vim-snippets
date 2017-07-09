@@ -940,4 +940,88 @@ private static long[][] powMat(long[][] A, long n) {
 }
 endsnippet
 
+snippet sam "Suffix automaton"
+class SAM {
+	static class State {
+		int max_len;
+		int min_len;
+		State suffix_link;
+		State[] transitions;
+		State(int size, int max_len, int min_len, State suffix_link, State[] transitions) {
+			this.max_len = max_len;
+			this.min_len = min_len;
+			this.suffix_link = suffix_link;
+			this.transitions = new State[size];
+			if (transitions != null) {
+				for (int i = 0; i < size && i < transitions.length; i++) {
+					this.transitions[i] = transitions[i];
+				}
+			}
+		}
+	}
+
+	private int size = ${1:30};
+	private int length = 0;
+	private State[] states;
+
+	public SAM(String str) {
+		this.states = new State[(str.length() << 1) + 5];
+
+		this.states[length++] = new State(this.size, 0, 0, null, null);
+
+		for (int i = 0; i < str.length(); i++) {
+			int ch = charPointAt(str, i);
+			add(ch);
+		}
+	}
+
+	public void add(int ch) {
+		State last = this.states[length-1];
+		State next = new State(this.size, last.max_len + 1, 1, null, null);
+
+		while (last != null && last.transitions[ch] == null) {
+			last.transitions[ch] = next;
+			last = last.suffix_link;
+		}
+
+		if (last == null) {
+			next.min_len = 1;
+			next.suffix_link = this.states[0];
+			this.states[length++] = next;
+			return;
+		}
+
+		State lastNext = last.transitions[ch];
+		if (lastNext.max_len == last.max_len + 1) {
+			next.min_len = lastNext.max_len + 1;
+			next.suffix_link = lastNext;
+			this.states[length++] = next;
+			return;
+		}
+
+		State splitLastNext = new State(this.size, last.max_len + 1, 1, lastNext.suffix_link, lastNext.transitions);
+		lastNext.min_len = splitLastNext.max_len + 1;
+		lastNext.suffix_link = splitLastNext;
+
+		next.min_len = splitLastNext.max_len + 1;
+		next.suffix_link = splitLastNext;
+
+		while (last != null && last.transitions[ch] == lastNext) {
+			last.transitions[ch] = splitLastNext;
+			last = last.suffix_link;
+		}
+
+		splitLastNext.min_len = splitLastNext.suffix_link.max_len + 1;
+
+		this.states[length++] = splitLastNext;
+		this.states[length++] = next;
+	}
+
+	private int charPointAt(String str, int i) {
+		char ch = str.charAt(i);
+		return ch - 'a';$0
+	}
+}
+endsnippet
+
 # vim:ft=snippets:
